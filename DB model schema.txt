@@ -1,0 +1,25 @@
+
+
+User
+ - id
+ - email required
+ - password required
+ - Role (Owner, Admin)
+ - spotify id 
+
+Collection
+ - id
+ - user_id
+ - title
+ - release_dates
+ - cover_art
+ - spotify_link
+ - album_id
+ - type
+
+ 
+
+
+featured artist table for later phase
+
+PHASE 2 - play around with spotify ids more, perhapse I don't need to store much if I can just call the information

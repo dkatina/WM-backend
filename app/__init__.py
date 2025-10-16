@@ -4,6 +4,7 @@ from .models import db
 from .extensions import ma
 from .blueprints.users import users_bp
 from .blueprints.collections import collections_bp
+from flask_cors import CORS
 
 #create the application factory
 def create_app(config_name):
@@ -12,6 +13,7 @@ def create_app(config_name):
     app = Flask(__name__)
     #configure the app
     app.config.from_object(f'config.{config_name}')
+    CORS(app)
 
     #Initialize extensions on app
     db.init_app(app)

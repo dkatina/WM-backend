@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from app.models import Collection, db
+from app.util.auth import token_required
 from .schemas import collection_schema, collections_schema
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,6 +10,7 @@ from . import collections_bp
 
 #Register/Create collection
 @collections_bp.route('', methods=['POST'])
+@token_required
 def create_collection():
     #load validata the request data
     try:
@@ -29,7 +31,7 @@ def create_collection():
     }), 201
 
 
-#View Profile - Token Auth Eventually
+#View Collection - Token Auth Eventually
 @collections_bp.route('/<int:collection_id>', methods=['GET'])
 def get_collection(collection_id):
     collection = db.session.get(Collection, collection_id)
@@ -43,10 +45,14 @@ def get_collections():
     collections = db.session.query(Collection).all()
     return collections_schema.jsonify(collections), 200
 
-#Update Profile
+#Update Collection
 @collections_bp.route('/<int:collection_id>', methods=['PUT'])
+@token_required
 def update_collection(collection_id):
     collection = db.session.get(Collection,collection_id)
+    user_id = request.user_id
+    if user_id != collection.user_id:
+        return jsonify({"error": "access denied"})
 
     if not collection:
         return jsonify({"error": "Invalid collection Id"}), 404
@@ -66,10 +72,14 @@ def update_collection(collection_id):
     }), 200
 
 
-#Delete Profile
+#Delete Collection
 @collections_bp.route('/<int:collection_id>', methods=['DELETE'])
+@token_required
 def delete_collection(collection_id):
     collection = db.session.get(Collection, collection_id)
+    user_id = request.user_id
+    if user_id != collection.user_id:
+        return jsonify({"error": "access denied"})
     if collection:
         db.session.delete(collection)
         db.session.commit()

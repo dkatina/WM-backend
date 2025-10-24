@@ -1,7 +1,7 @@
 #Where I will initialize SQLAlchemy and create my models
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import Date, String, ForeignKey
+from sqlalchemy import Date, Integer, String, ForeignKey
 from datetime import date
 
 #Create Base Model to be inherited from
@@ -35,6 +35,8 @@ class Collection(Base):
     spotify_link: Mapped[str] = mapped_column(String(500), nullable=False)
     album_id: Mapped[str] = mapped_column(String(100), nullable=False)
     collection_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    total_tracks: Mapped[int] = mapped_column(Integer(), nullable=False)
+    artist_name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     user: Mapped['User'] = relationship('User', back_populates='collections')
     

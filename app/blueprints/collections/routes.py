@@ -1,10 +1,11 @@
 from flask import request, jsonify
-from app.models import Collection, db
+from app.models import Collection, db, User
 from app.util.auth import token_required
 from .schemas import collection_schema, collections_schema
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import collections_bp
+
 
 #Login
 
@@ -12,6 +13,12 @@ from . import collections_bp
 @collections_bp.route('', methods=['POST'])
 @token_required
 def create_collection():
+    user = db.session.get(User, request.user_id)
+
+    if len(user.collections) >= 5:
+        return jsonify({'error': 'You have reach the maximum stored albums'}), 400
+    
+
     #load validata the request data
     try:
         data = collection_schema.load(request.json)
@@ -24,10 +31,12 @@ def create_collection():
     db.session.commit()
     #create a new collection in my database
 
+    
+
     #send a response
     return jsonify({
         "message": "successfully create collection",
-        "collection": collection_schema.dump(new_collection)
+        "collections": collections_schema.dump(user.collections)
     }), 201
 
 
@@ -78,10 +87,13 @@ def update_collection(collection_id):
 def delete_collection(collection_id):
     collection = db.session.get(Collection, collection_id)
     user_id = request.user_id
+    user = db.session.get(User, user_id)
     if user_id != collection.user_id:
         return jsonify({"error": "access denied"})
     if collection:
         db.session.delete(collection)
         db.session.commit()
-        return jsonify({"message": "successfully deleted collection."}), 200
+        return jsonify({
+            "message": "successfully deleted collection.",
+            "collections": collections_schema.dump(user.collections)}), 200
     return jsonify({"error": "invalid collection id"}), 404
